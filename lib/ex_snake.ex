@@ -1,18 +1,12 @@
 defmodule ExSnake do
-  @moduledoc """
-  Documentation for ExSnake.
-  """
+  use Supervisor
 
-  @doc """
-  Hello world.
+  def start_link do
+    # start the gui process
+    children = [
+      worker(ExSnake.Gui.Window, [])
+    ]
 
-  ## Examples
-
-      iex> ExSnake.hello()
-      :world
-
-  """
-  def hello do
-    :world
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 end
