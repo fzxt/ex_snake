@@ -4,7 +4,7 @@ defmodule ExSnake do
   def start_link do
     # start the gui process
     children = [
-      worker(ExSnake.Gui.Window, [])
+      worker(ExSnake.Grid, [])
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one)
