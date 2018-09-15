@@ -1,3 +1,3 @@
 defmodule ExSnake.Grid.State do
-    defstruct rows: 10, cols: 10
+    defstruct rows: 30, cols: 50
 end

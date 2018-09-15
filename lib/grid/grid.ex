@@ -1,5 +1,4 @@
 defmodule ExSnake.Grid do
-
     use GenServer
 
     @refresh_interval 500
@@ -11,14 +10,11 @@ defmodule ExSnake.Grid do
     ## Server callbacks
 
     def init(state) do
-        { width, height } = get_terminal_dimensions()
-
-        state = %ExSnake.Grid.State{ state | rows: height - 5, cols: width - 1 }
-
         [
             IO.ANSI.clear,
             IO.ANSI.home,
-            ExSnake.Grid.Formatter.draw_grid(state.rows, state.cols),
+            ExSnake.Grid.Formatter.draw_walls(state.rows, state.cols),
+            ExSnake.Grid.Formatter.reset_cursor
         ]
         |> IO.write
 
@@ -28,13 +24,6 @@ defmodule ExSnake.Grid do
     end
 
     def handle_info(:tick, state) do
-        if resized_window(state) do
-            { width, height } = get_terminal_dimensions()
-            state = %ExSnake.Grid.State{ state | rows: height - 5, cols: width - 1 }
-            [IO.ANSI.clear, IO.ANSI.home, ExSnake.Grid.Formatter.draw_grid(state.rows, state.cols)]
-            |> IO.write
-        end
-
         schedule_next_tick()
         {:noreply, state}
     end
@@ -43,16 +32,5 @@ defmodule ExSnake.Grid do
 
     defp schedule_next_tick() do
         Process.send_after(self(), :tick, @refresh_interval)
-    end
-
-    defp get_terminal_dimensions do
-        {:ok,width} = :io.columns
-        {:ok,height} = :io.rows
-        {width, height}
-    end
-
-    defp resized_window(state) do
-        { width, height } = get_terminal_dimensions()
-        state.cols != width or state.rows != height
     end
 end
