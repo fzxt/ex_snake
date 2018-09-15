@@ -10,9 +10,8 @@ defmodule ExSnake do
   end
 
   def init([]) do
-    # start the gui process
     children = [
-      worker(ExSnake.Grid, [])
+      worker(ExSnake.UI.Grid, [])
     ]
 
     supervise(children, strategy: :one_for_one)
