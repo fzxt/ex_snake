@@ -11,7 +11,8 @@ defmodule ExSnake do
 
   def init([]) do
     children = [
-      worker(ExSnake.UI, [])
+      worker(ExSnake.UI, []),
+      worker(ExSnake.IO, [])
     ]
 
     supervise(children, strategy: :one_for_one)

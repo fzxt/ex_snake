@@ -6,7 +6,7 @@ defmodule ExSnake.UI.Formatter do
   @bottom_left_corner "\u2514"
   @bottom_right_corner "\u2518"
 
-  def draw_walls(%ExSnake.State{ window: window }) do
+  def draw_walls(%ExSnake.State{window: window}) do
     [
       top_bar(window.width),
       vert_lines(window.height, window.width),
@@ -57,7 +57,12 @@ defmodule ExSnake.UI.Formatter do
   end
 
   defp bottom_bar(width) do
-    [@bottom_left_corner, String.duplicate("#{@mid_bar}#{@mid_bar}", width), @bottom_right_corner, "\n"]
+    [
+      @bottom_left_corner,
+      String.duplicate("#{@mid_bar}#{@mid_bar}", width),
+      @bottom_right_corner,
+      "\n"
+    ]
   end
 
   defp draw_snake_piece(coord) do

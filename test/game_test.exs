@@ -7,17 +7,16 @@ defmodule GameTest do
       initial_state = %ExSnake.State{
         snake: [%{x: 9, y: 10}],
         food: %{x: 10, y: 10},
-        direction: :right,
+        direction: :right
       }
 
       next_state = ExSnake.Game.move_snake(initial_state)
 
-
       assert next_state == %ExSnake.State{
-        snake: [%{x: 9, y: 10}, %{x: 10, y: 10}],
-        food: %{x: 10, y: 10},
-        direction: :right
-      }
+               snake: [%{x: 9, y: 10}, %{x: 10, y: 10}],
+               food: %{x: 10, y: 10},
+               direction: :right
+             }
     end
 
     test "should compute correct state when snake is not about to eat food" do
@@ -30,10 +29,10 @@ defmodule GameTest do
       next_state = ExSnake.Game.move_snake(initial_state)
 
       assert next_state == %ExSnake.State{
-        snake: [%{x: 8, y: 10}, %{x: 9, y: 10}],
-        food: %{x: 10, y: 10},
-        direction: :right
-      }
+               snake: [%{x: 8, y: 10}, %{x: 9, y: 10}],
+               food: %{x: 10, y: 10},
+               direction: :right
+             }
     end
   end
 

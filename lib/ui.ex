@@ -1,10 +1,10 @@
 defmodule ExSnake.UI do
   use GenServer
 
-  @refresh_interval 500
+  @refresh_interval 100
 
   def start_link do
-    GenServer.start_link(__MODULE__, %ExSnake.State{}, name: :window)
+    GenServer.start_link(__MODULE__, %ExSnake.State{}, name: :ui)
   end
 
   ## Server callbacks
@@ -29,6 +29,10 @@ defmodule ExSnake.UI do
     state
     |> ExSnake.UI.Formatter.undraw_snake_tail()
     |> IO.write()
+  end
+
+  def handle_info({:direction, direction}, state) do
+    {:noreply, %ExSnake.State{state | direction: direction}}
   end
 
   def handle_info(:tick, state) do
