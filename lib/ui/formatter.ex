@@ -6,11 +6,11 @@ defmodule ExSnake.UI.Formatter do
   @bottom_left_corner "\u2514"
   @bottom_right_corner "\u2518"
 
-  def draw_walls(height, width) do
+  def draw_walls(%ExSnake.State{ window: window }) do
     [
-      top_bar(width),
-      vert_lines(height, width),
-      bottom_bar(width)
+      top_bar(window.width),
+      vert_lines(window.height, window.width),
+      bottom_bar(window.width)
     ]
   end
 
@@ -26,13 +26,13 @@ defmodule ExSnake.UI.Formatter do
     IO.ANSI.format(["\e[#{trunc(row)};#{trunc(col)}f"])
   end
 
-  def draw_snake(%ExSnake.UI.State{snake: snake}) do
+  def draw_snake(%ExSnake.State{snake: snake}) do
     Enum.map(snake, fn piece ->
       draw_snake_piece(piece)
     end)
   end
 
-  def draw_food(%ExSnake.UI.State{food: pos}) do
+  def draw_food(%ExSnake.State{food: pos}) do
     draw_food_piece(pos)
   end
 
@@ -40,7 +40,7 @@ defmodule ExSnake.UI.Formatter do
     move_cursor(0, 0)
   end
 
-  def undraw_snake_tail(%ExSnake.UI.State{snake: snake_list}) do
+  def undraw_snake_tail(%ExSnake.State{snake: snake_list}) do
     undraw_snake_tail_cell(Enum.at(snake_list, 0))
   end
 

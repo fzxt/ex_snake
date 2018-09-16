@@ -1,13 +1,10 @@
-defmodule ExSnake.UI.Grid do
-  @height 30
-  @width 50
-
+defmodule ExSnake.UI do
   use GenServer
 
   @refresh_interval 500
 
   def start_link do
-    GenServer.start_link(__MODULE__, %ExSnake.UI.State{}, name: :window)
+    GenServer.start_link(__MODULE__, %ExSnake.State{}, name: :window)
   end
 
   ## Server callbacks
@@ -16,7 +13,7 @@ defmodule ExSnake.UI.Grid do
     [
       IO.ANSI.clear(),
       IO.ANSI.home(),
-      ExSnake.UI.Formatter.draw_walls(@height, @width),
+      ExSnake.UI.Formatter.draw_walls(state),
       ExSnake.UI.Formatter.draw_snake(state),
       ExSnake.UI.Formatter.draw_food(state),
       ExSnake.UI.Formatter.reset_cursor()
@@ -41,8 +38,8 @@ defmodule ExSnake.UI.Grid do
     # compute the next state
     state =
       state
-      |> ExSnake.Game.move_snake(@width, @height)
-      |> ExSnake.Game.move_food(@width, @height)
+      |> ExSnake.Game.move_snake()
+      |> ExSnake.Game.move_food()
 
     # output
     [
