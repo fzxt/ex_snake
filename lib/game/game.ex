@@ -6,9 +6,20 @@ defmodule ExSnake.Game do
     %ExSnake.UI.State{state | snake: popped ++ [next_pos]}
   end
 
-  def move_food(state) do
-    state
+  def move_food(state, width, height) do
+    %ExSnake.UI.State{ food: food, snake: snake } = state
+
+    new_state =
+      if Map.equal?(Enum.at(snake, length(snake) - 1), food) do
+        # ate the thing
+        %ExSnake.UI.State{ state | food: random_pos(width, height) }
+      else
+        state
+      end
+
+    new_state
   end
+
 
   def compute_next_pos(pos, :right, width, _), do: Map.put(pos, :x, mod(pos.x + 1, width))
   def compute_next_pos(pos, :left, width, _), do: Map.put(pos, :x, mod(pos.x - 1, width))
@@ -21,4 +32,6 @@ defmodule ExSnake.Game do
 
   defp add_one(rem) when rem <= 0, do: rem + 1
   defp add_one(rem), do: rem
+
+  defp random_pos(width, height), do: %{ x: :rand.uniform(width), y: :rand.uniform(height) }
 end

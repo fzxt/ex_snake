@@ -42,7 +42,7 @@ defmodule ExSnake.UI.Grid do
     state =
       state
       |> ExSnake.Game.move_snake(@width, @height)
-      |> ExSnake.Game.move_food()
+      |> ExSnake.Game.move_food(@width, @height)
 
     # output
     [

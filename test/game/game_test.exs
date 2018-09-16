@@ -29,4 +29,15 @@ defmodule GameTest do
 
     assert computed_pos.y == 1
   end
+
+  test "should move food to random position if snake is at foods position" do
+    initial_state = %ExSnake.UI.State{
+      snake: [%{x: 10, y: 10}],
+      food: %{x: 10, y: 10}
+    }
+
+    computed_state = ExSnake.Game.move_food(initial_state, 20, 20)
+
+    assert Map.equal?(initial_state.food, computed_state.food) == false
+  end
 end
