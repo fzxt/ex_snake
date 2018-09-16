@@ -1,55 +1,64 @@
 defmodule ExSnake.UI.Grid do
-    use GenServer
+  @height 30
+  @width 50
 
-    @refresh_interval 500
+  use GenServer
 
-    def start_link do
-        GenServer.start_link(__MODULE__, %ExSnake.UI.State{}, name: :window)
-    end
+  @refresh_interval 500
 
-    ## Server callbacks
+  def start_link do
+    GenServer.start_link(__MODULE__, %ExSnake.UI.State{}, name: :window)
+  end
 
-    def init(state) do
-        [
-            IO.ANSI.clear,
-            IO.ANSI.home,
-            ExSnake.UI.Formatter.draw_walls(),
-            ExSnake.UI.Formatter.draw_snake(state),
-            ExSnake.UI.Formatter.reset_cursor
-        ]
-        |> IO.write
+  ## Server callbacks
 
-        schedule_next_tick()
+  def init(state) do
+    [
+      IO.ANSI.clear(),
+      IO.ANSI.home(),
+      ExSnake.UI.Formatter.draw_walls(@height, @width),
+      ExSnake.UI.Formatter.draw_snake(state),
+      ExSnake.UI.Formatter.draw_food(state),
+      ExSnake.UI.Formatter.reset_cursor()
+    ]
+    |> IO.write()
 
-        {:ok, state}
-    end
+    schedule_next_tick()
 
-    def undraw_snake_tail(state) do
+    {:ok, state}
+  end
+
+  def undraw_snake_tail(state) do
+    state
+    |> ExSnake.UI.Formatter.undraw_snake_tail()
+    |> IO.write()
+  end
+
+  def handle_info(:tick, state) do
+    # need to undraw the previous snakes tail
+    undraw_snake_tail(state)
+
+    # compute the next state
+    state =
       state
-      |> ExSnake.UI.Formatter.undraw_snake_tail
-      |> IO.write
+      |> ExSnake.Game.move_snake(@width, @height)
+      |> ExSnake.Game.move_food()
 
-      state
-    end
+    # output
+    [
+      ExSnake.UI.Formatter.draw_snake(state),
+      ExSnake.UI.Formatter.draw_food(state),
+      ExSnake.UI.Formatter.reset_cursor()
+    ]
+    |> IO.write()
 
-    def handle_info(:tick, state) do
-        state = state
-        |> undraw_snake_tail
-        |> ExSnake.Game.move_snake
+    schedule_next_tick()
+    {:noreply, state}
+  end
 
-        [
-          ExSnake.UI.Formatter.draw_snake(state),
-          ExSnake.UI.Formatter.reset_cursor
-        ]
-        |> IO.write
+  ## Private
 
-        schedule_next_tick()
-        {:noreply, state}
-    end
-
-    ## Private
-
-    defp schedule_next_tick() do
-        Process.send_after(self(), :tick, @refresh_interval)
-    end
+  defp schedule_next_tick() do
+    Process.send_after(self(), :tick, @refresh_interval)
+  end
 end

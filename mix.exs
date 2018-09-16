@@ -29,7 +29,6 @@ defmodule ExSnake.MixProject do
   end
 
   defp escript do
-    [main_module: ExSnake.CLI,
-     emu_args: "-noinput -elixir ansi_enabled true"]
+    [main_module: ExSnake.CLI, emu_args: "-noinput -elixir ansi_enabled true"]
   end
 end
