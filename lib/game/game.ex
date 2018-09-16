@@ -1,25 +1,24 @@
 defmodule ExSnake.Game do
   def move_snake(state, width, height) do
-    # to move the snake, we remove the first node(head), add to the last node (tail)
-    next_pos = compute_next_pos(Enum.at(state.snake, 0), state.direction, width, height)
-    {_, popped} = List.pop_at(state.snake, 0)
-    %ExSnake.UI.State{state | snake: popped ++ [next_pos]}
+    next_pos = compute_next_pos(Enum.at(state.snake, length(state.snake) - 1), state.direction, width, height)
+    
+    if Map.equal?(next_pos, state.food) do
+        %ExSnake.UI.State{state | snake: state.snake ++ [next_pos]}
+      else
+        {_, popped} = List.pop_at(state.snake, 0)
+        %ExSnake.UI.State{state | snake: popped ++ [next_pos]}
+      end
   end
 
   def move_food(state, width, height) do
     %ExSnake.UI.State{ food: food, snake: snake } = state
-
-    new_state =
-      if Map.equal?(Enum.at(snake, length(snake) - 1), food) do
-        # ate the thing
-        %ExSnake.UI.State{ state | food: random_pos(width, height) }
-      else
-        state
-      end
-
-    new_state
+    if Map.equal?(Enum.at(snake, length(snake) - 1), food) do
+      # ate the thing
+      %ExSnake.UI.State{ state | food: random_pos(width, height) }
+    else
+      state
+    end
   end
-
 
   def compute_next_pos(pos, :right, width, _), do: Map.put(pos, :x, mod(pos.x + 1, width))
   def compute_next_pos(pos, :left, width, _), do: Map.put(pos, :x, mod(pos.x - 1, width))

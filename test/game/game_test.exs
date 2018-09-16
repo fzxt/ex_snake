@@ -2,6 +2,39 @@ defmodule GameTest do
   use ExUnit.Case
   doctest ExSnake
 
+  test "should compute correct state when snake is about to eat food" do
+    initial_state = %ExSnake.UI.State{
+      snake: [%{x: 9, y: 10}],
+      food: %{x: 10, y: 10},
+      direction: :right
+    }
+
+    next_state = ExSnake.Game.move_snake(initial_state, 20, 20)
+
+
+    assert next_state == %ExSnake.UI.State{
+      snake: [%{x: 9, y: 10}, %{x: 10, y: 10}],
+      food: %{x: 10, y: 10},
+      direction: :right
+    }
+  end
+
+  test "should compute correct state when snake is not about to eat food" do
+    initial_state = %ExSnake.UI.State{
+      snake: [%{x: 7, y: 10}, %{x: 8, y: 10}],
+      food: %{x: 10, y: 10},
+      direction: :right
+    }
+
+    next_state = ExSnake.Game.move_snake(initial_state, 20, 20)
+
+    assert next_state == %ExSnake.UI.State{
+      snake: [%{x: 8, y: 10}, %{x: 9, y: 10}],
+      food: %{x: 10, y: 10},
+      direction: :right
+    }
+  end
+
   test "should wrap around correctly - right" do
     start_pos = %{x: 9, y: 1}
     computed_pos = ExSnake.Game.compute_next_pos(start_pos, :right, 10, 10)
@@ -32,7 +65,7 @@ defmodule GameTest do
 
   test "should move food to random position if snake is at foods position" do
     initial_state = %ExSnake.UI.State{
-      snake: [%{x: 10, y: 10}],
+      snake: [%{x: 9, y: 10}, %{x: 10, y: 10}],
       food: %{x: 10, y: 10}
     }
 

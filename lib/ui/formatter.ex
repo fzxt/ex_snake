@@ -26,9 +26,9 @@ defmodule ExSnake.UI.Formatter do
     IO.ANSI.format(["\e[#{trunc(row)};#{trunc(col)}f"])
   end
 
-  def draw_snake(%ExSnake.UI.State{snake: snake_coords}) do
-    Enum.map(snake_coords, fn coord ->
-      draw_snake_piece(coord)
+  def draw_snake(%ExSnake.UI.State{snake: snake}) do
+    Enum.map(snake, fn piece ->
+      draw_snake_piece(piece)
     end)
   end
 
@@ -46,7 +46,7 @@ defmodule ExSnake.UI.Formatter do
 
   ## Private
 
-  defp undraw_snake_tail_cell(%{x: col, y: row}), do: [move_cursor(row, col * 2), '  ']
+  defp undraw_snake_tail_cell(coord), do: [move_cursor(coord.y, coord.x * 2), '  ']
 
   defp draw_vert_line(_, 1, _), do: @vert_line
   defp draw_vert_line(_, col, width) when col == width, do: "    #{@vert_line}\n"
