@@ -31,11 +31,37 @@ defmodule ExSnake.UI do
     |> IO.write()
   end
 
+  def undraw_game(state) do
+    [
+      ExSnake.UI.Formatter.undraw_snake(state),
+      ExSnake.UI.Formatter.undraw_food(state)
+    ]
+    |> IO.write()
+  end
+
   def handle_info({:direction, direction}, state) do
     {:noreply, %ExSnake.State{state | direction: direction}}
   end
 
-  def handle_info(:tick, state) do
+  def handle_info(:tick, %ExSnake.State{ alive?: false } = state) do
+    undraw_game(state)
+
+    # reset the state
+    state = %ExSnake.State{}
+
+    # output
+    [
+      ExSnake.UI.Formatter.draw_snake(state),
+      ExSnake.UI.Formatter.draw_food(state),
+      ExSnake.UI.Formatter.reset_cursor()
+    ]
+    |> IO.write()
+
+    schedule_next_tick()
+    {:noreply, state}
+  end
+
+  def handle_info(:tick, %ExSnake.State{ alive?: true } = state) do
     # need to undraw the previous snakes tail
     undraw_snake_tail(state)
 

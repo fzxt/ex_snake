@@ -8,9 +8,9 @@ defmodule ExSnake.UI.Formatter do
 
   def draw_walls(%ExSnake.State{window: window}) do
     [
-      top_bar(window.width),
-      vert_lines(window.height, window.width),
-      bottom_bar(window.width)
+      top_bar(window.width - 1),
+      vert_lines(window.height - 1, window.width - 1),
+      bottom_bar(window.width - 1)
     ]
   end
 
@@ -40,13 +40,23 @@ defmodule ExSnake.UI.Formatter do
     move_cursor(0, 0)
   end
 
-  def undraw_snake_tail(%ExSnake.State{snake: snake_list}) do
-    undraw_snake_tail_cell(Enum.at(snake_list, 0))
+  def undraw_snake_tail(%ExSnake.State{snake: snake}) do
+    undraw_cell(Enum.at(snake, 0))
+  end
+
+  def undraw_snake(%ExSnake.State{snake: snake}) do
+      Enum.map(snake, fn piece ->
+        undraw_cell(piece)
+      end)
+  end
+
+  def undraw_food(%ExSnake.State{food: food}) do
+    undraw_cell(food)
   end
 
   ## Private
 
-  defp undraw_snake_tail_cell(coord), do: [move_cursor(coord.y, coord.x * 2), '  ']
+  defp undraw_cell(coord), do: [move_cursor(coord.y, coord.x * 2), '  ']
 
   defp draw_vert_line(_, 1, _), do: @vert_line
   defp draw_vert_line(_, col, width) when col == width, do: "    #{@vert_line}\n"
