@@ -1,6 +1,8 @@
 defmodule ExSnake.UI do
   use GenServer
 
+  alias ExSnake.UI.Formatter, as: Formatter
+
   @refresh_interval 100
 
   def start_link do
@@ -10,14 +12,8 @@ defmodule ExSnake.UI do
   ## Server callbacks
 
   def init(state) do
-    [
-      IO.ANSI.clear(),
-      IO.ANSI.home(),
-      ExSnake.UI.Formatter.draw_walls(state),
-      ExSnake.UI.Formatter.draw_snake(state),
-      ExSnake.UI.Formatter.draw_food(state),
-      ExSnake.UI.Formatter.reset_cursor()
-    ]
+    state
+    |> Formatter.draw_game()
     |> IO.write()
 
     schedule_next_tick()
@@ -25,58 +21,37 @@ defmodule ExSnake.UI do
     {:ok, state}
   end
 
-  def undraw_snake_tail(state) do
-    state
-    |> ExSnake.UI.Formatter.undraw_snake_tail()
-    |> IO.write()
-  end
-
-  def undraw_game(state) do
-    [
-      ExSnake.UI.Formatter.undraw_snake(state),
-      ExSnake.UI.Formatter.undraw_food(state)
-    ]
-    |> IO.write()
-  end
-
   def handle_info({:direction, direction}, state) do
     {:noreply, %ExSnake.State{state | direction: direction}}
   end
 
-  def handle_info(:tick, %ExSnake.State{ alive?: false } = state) do
-    undraw_game(state)
+  def handle_info(:tick, %ExSnake.State{alive?: false} = state) do
+    state
+    |> Formatter.undraw_snake_and_food()
+    |> IO.write()
 
-    # reset the state
     state = %ExSnake.State{}
 
-    # output
-    [
-      ExSnake.UI.Formatter.draw_snake(state),
-      ExSnake.UI.Formatter.draw_food(state),
-      ExSnake.UI.Formatter.reset_cursor()
-    ]
+    state
+    |> Formatter.draw_snake_and_food()
     |> IO.write()
 
     schedule_next_tick()
     {:noreply, state}
   end
 
-  def handle_info(:tick, %ExSnake.State{ alive?: true } = state) do
-    # need to undraw the previous snakes tail
-    undraw_snake_tail(state)
+  def handle_info(:tick, %ExSnake.State{alive?: true} = state) do
+    state
+    |> Formatter.undraw_snake_tail()
+    |> IO.write()
 
-    # compute the next state
     state =
       state
       |> ExSnake.Game.move_snake()
       |> ExSnake.Game.move_food()
 
-    # output
-    [
-      ExSnake.UI.Formatter.draw_snake(state),
-      ExSnake.UI.Formatter.draw_food(state),
-      ExSnake.UI.Formatter.reset_cursor()
-    ]
+    state
+    |> Formatter.draw_snake_and_food()
     |> IO.write()
 
     schedule_next_tick()

@@ -50,28 +50,28 @@ defmodule GameTest do
   end
 
   describe "compute_next_pos" do
-    test "compute_next_pos should wrap around correctly - right" do
+    test "should wrap around correctly - right" do
       start_pos = %{x: 9, y: 1}
       computed_pos = ExSnake.Game.compute_next_pos(start_pos, :right, %{width: 10, height: 10})
 
       assert computed_pos.x == 1
     end
 
-    test "compute_next_pos should wrap around correctly - left" do
+    test "should wrap around correctly - left" do
       start_pos = %{x: 0, y: 1}
       computed_pos = ExSnake.Game.compute_next_pos(start_pos, :left, %{width: 10, height: 10})
 
       assert computed_pos.x == 9
     end
 
-    test "compute_next_pos should wrap around correctly - up" do
+    test "should wrap around correctly - up" do
       start_pos = %{x: 0, y: 0}
       computed_pos = ExSnake.Game.compute_next_pos(start_pos, :up, %{width: 10, height: 10})
 
       assert computed_pos.y == 9
     end
 
-    test "compute_next_pos should wrap around correctly - down" do
+    test "should wrap around correctly - down" do
       start_pos = %{x: 0, y: 9}
       computed_pos = ExSnake.Game.compute_next_pos(start_pos, :down, %{width: 10, height: 10})
 
