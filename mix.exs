@@ -14,10 +14,17 @@ defmodule ExSnake.MixProject do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [
-      extra_applications: [:logger],
-      mod: {ExSnake, []}
-    ]
+    if Mix.env() == :test do
+      [
+        extra_applications: [:logger]
+      ]
+    else
+      # don't define the mod attribute for test env, screws up output
+      [
+        extra_applications: [:logger],
+        mod: {ExSnake, []}
+      ]
+    end
   end
 
   # Run "mix help deps" to learn about dependencies.

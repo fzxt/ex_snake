@@ -14,6 +14,8 @@ defmodule ExSnake.IO do
     GenServer.start_link(__MODULE__, [], name: :io)
   end
 
+  ## Server callbacks
+
   def handle_info({pid, {:data, data}}, pid) do
     case handle_event(data) do
       :right -> Process.send(:ui, {:direction, :right}, [])
@@ -26,15 +28,17 @@ defmodule ExSnake.IO do
     {:noreply, pid}
   end
 
-  def handle_event(@up_arrow), do: :up
-  def handle_event(@right_arrow), do: :right
-  def handle_event(@left_arrow), do: :left
-  def handle_event(@down_arrow), do: :down
+  ## Private, event handlers
 
-  def handle_event("w"), do: :up
-  def handle_event("a"), do: :left
-  def handle_event("s"), do: :down
-  def handle_event("d"), do: :right
+  defp handle_event(@up_arrow), do: :up
+  defp handle_event(@right_arrow), do: :right
+  defp handle_event(@left_arrow), do: :left
+  defp handle_event(@down_arrow), do: :down
 
-  def handle_event(_), do: :none
+  defp handle_event("w"), do: :up
+  defp handle_event("a"), do: :left
+  defp handle_event("s"), do: :down
+  defp handle_event("d"), do: :right
+
+  defp handle_event(_), do: :none
 end

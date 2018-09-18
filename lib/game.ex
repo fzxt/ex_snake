@@ -1,6 +1,9 @@
 defmodule ExSnake.Game do
+  def next_state(%ExSnake.State{alive?: false}), do: %ExSnake.State{}
+  def next_state(state), do: state |> move_snake() |> move_food()
+
   def move_snake(%ExSnake.State{snake: snake, direction: direction, window: window} = state) do
-    next_pos = compute_next_pos(get_head(snake), direction, window)
+    next_pos = next_snake_pos(get_head(snake), direction, window)
 
     case interpret_move(next_pos, state) do
       :collision ->
@@ -16,39 +19,38 @@ defmodule ExSnake.Game do
   end
 
   def move_food(%ExSnake.State{snake: snake, food: food, window: window} = state) do
-    if ate_food?(get_head(snake), food) do
+    if Map.equal?(get_head(snake), food) do
       %ExSnake.State{state | food: random_pos(window.width - 2, window.height - 2)}
     else
       state
     end
   end
 
-  def compute_next_pos(pos, :right, %{width: width}), do: Map.put(pos, :x, mod(pos.x + 1, width))
-  def compute_next_pos(pos, :left, %{width: width}), do: Map.put(pos, :x, mod(pos.x - 1, width))
+  def next_snake_pos(pos, :right, %{width: width}),
+    do: Map.put(pos, :x, limit(pos.x + 1, width - 1))
 
-  def compute_next_pos(pos, :down, %{height: height}),
-    do: Map.put(pos, :y, mod(pos.y + 1, height))
+  def next_snake_pos(pos, :down, %{height: height}),
+    do: Map.put(pos, :y, limit(pos.y + 1, height - 1))
 
-  def compute_next_pos(pos, :up, %{height: height}), do: Map.put(pos, :y, mod(pos.y - 1, height))
+  def next_snake_pos(pos, :left, %{width: width}),
+    do: Map.put(pos, :x, limit(pos.x - 1, width - 2))
+
+  def next_snake_pos(pos, :up, %{height: height}),
+    do: Map.put(pos, :y, limit(pos.y - 1, height - 1))
 
   ## Private
 
-  defp mod(x, y) when x > 0, do: add_one(rem(x, y))
-  defp mod(x, y) when x < 0, do: add_one(y + rem(x, y))
-  defp mod(0, _), do: 0
+  defp limit(value, max) when value <= 1, do: max
+  defp limit(value, max) when value >= max, do: 2
+  defp limit(value, _), do: value
 
-  defp add_one(rem) when rem <= 0, do: rem + 1
-  defp add_one(rem), do: rem
-
-  defp random_pos(width, height), do: %{x: :rand.uniform(width), y: :rand.uniform(height)}
-
-  defp ate_food?(pos, food), do: Map.equal?(pos, food)
+  defp random_pos(width, height), do: %{x: :rand.uniform(width) + 1, y: :rand.uniform(height) + 1}
 
   defp interpret_move(pos, %ExSnake.State{snake: snake, food: food}) do
     if Enum.member?(snake, pos) do
       :collision
     else
-      if(ate_food?(pos, food), do: :ate_food, else: :didnt_eat)
+      if(Map.equal?(pos, food), do: :ate_food, else: :didnt_eat)
     end
   end
 

@@ -1,23 +1,20 @@
 defmodule ExSnake.UI do
   use GenServer
 
-  alias ExSnake.UI.Formatter, as: Formatter
+  alias ExSnake.Game, as: Game
+  alias ExSnake.Formatter, as: Formatter
 
   @refresh_interval 100
 
-  def start_link do
-    GenServer.start_link(__MODULE__, %ExSnake.State{}, name: :ui)
-  end
+  def start_link, do: GenServer.start_link(__MODULE__, %ExSnake.State{}, name: :ui)
 
   ## Server callbacks
 
   def init(state) do
     state
     |> Formatter.draw_game()
-    |> IO.write()
 
     schedule_next_tick()
-
     {:ok, state}
   end
 
@@ -25,34 +22,12 @@ defmodule ExSnake.UI do
     {:noreply, %ExSnake.State{state | direction: direction}}
   end
 
-  def handle_info(:tick, %ExSnake.State{alive?: false} = state) do
-    state
-    |> Formatter.undraw_snake_and_food()
-    |> IO.write()
-
-    state = %ExSnake.State{}
-
-    state
-    |> Formatter.draw_snake_and_food()
-    |> IO.write()
-
-    schedule_next_tick()
-    {:noreply, state}
-  end
-
-  def handle_info(:tick, %ExSnake.State{alive?: true} = state) do
-    state
-    |> Formatter.undraw_snake_tail()
-    |> IO.write()
-
+  def handle_info(:tick, state) do
     state =
       state
-      |> ExSnake.Game.move_snake()
-      |> ExSnake.Game.move_food()
-
-    state
-    |> Formatter.draw_snake_and_food()
-    |> IO.write()
+      |> Formatter.undraw()
+      |> Game.next_state()
+      |> Formatter.draw_snake_and_food()
 
     schedule_next_tick()
     {:noreply, state}
@@ -60,7 +35,5 @@ defmodule ExSnake.UI do
 
   ## Private
 
-  defp schedule_next_tick() do
-    Process.send_after(self(), :tick, @refresh_interval)
-  end
+  defp schedule_next_tick, do: Process.send_after(self(), :tick, @refresh_interval)
 end

@@ -1,4 +1,4 @@
-defmodule ExSnake.UI.Formatter do
+defmodule ExSnake.Formatter do
   @mid_bar "\u2500"
   @vert_line "\u2502"
   @top_left_corner "\u250c"
@@ -10,34 +10,35 @@ defmodule ExSnake.UI.Formatter do
     [
       IO.ANSI.clear(),
       IO.ANSI.home(),
-      draw_walls(state),
-      draw_snake(state),
-      draw_food(state),
+      walls(state),
+      snake(state),
+      food(state),
       IO.ANSI.home()
     ]
-  end
+    |> IO.write()
 
-  def draw_walls(%ExSnake.State{window: window}) do
-    [
-      top_bar(window.width - 1),
-      vert_lines(window.height - 1, window.width - 1),
-      bottom_bar(window.width - 1)
-    ]
+    state
   end
 
   def draw_snake_and_food(state) do
-    [
-      draw_snake(state),
-      draw_food(state),
-      IO.ANSI.home()
-    ]
+    [snake(state), food(state), IO.ANSI.home()]
+    |> IO.write()
+
+    state
   end
 
-  def undraw_snake_and_food(state) do
-    [
-      undraw_snake(state),
-      undraw_food(state)
-    ]
+  def undraw(%ExSnake.State{alive?: false} = state) do
+    [undraw_snake(state), undraw_food(state)]
+    |> IO.write()
+
+    state
+  end
+
+  def undraw(%ExSnake.State{snake: snake} = state) do
+    undraw_cell(Enum.at(snake, 0))
+    |> IO.write()
+
+    state
   end
 
   def vert_lines(height, width) do
@@ -48,21 +49,23 @@ defmodule ExSnake.UI.Formatter do
     end)
   end
 
-  def undraw_snake_tail(%ExSnake.State{snake: snake}) do
-    undraw_cell(Enum.at(snake, 0))
-  end
-
   ## Private
 
-  defp draw_snake(%ExSnake.State{snake: snake}) do
+  defp walls(%ExSnake.State{window: window}) do
+    [
+      top_bar(window.width - 1),
+      vert_lines(window.height - 1, window.width - 1),
+      bottom_bar(window.width - 1)
+    ]
+  end
+
+  defp snake(%ExSnake.State{snake: snake}) do
     Enum.map(snake, fn piece ->
-      draw_snake_piece(piece)
+      draw_piece(piece, 'x')
     end)
   end
 
-  defp draw_food(%ExSnake.State{food: pos}) do
-    draw_food_piece(pos)
-  end
+  defp food(%ExSnake.State{food: pos}), do: draw_piece(pos, 'o')
 
   defp undraw_cell(coord), do: [move_cursor(coord.y, coord.x * 2), '  ']
 
@@ -72,9 +75,7 @@ defmodule ExSnake.UI.Formatter do
     end)
   end
 
-  defp undraw_food(%ExSnake.State{food: food}) do
-    undraw_cell(food)
-  end
+  defp undraw_food(%ExSnake.State{food: food}), do: undraw_cell(food)
 
   defp draw_vert_line(_, 1, _), do: @vert_line
   defp draw_vert_line(_, col, width) when col == width, do: "    #{@vert_line}\n"
@@ -93,15 +94,6 @@ defmodule ExSnake.UI.Formatter do
     ]
   end
 
-  defp move_cursor(row, col) do
-    IO.ANSI.format(["\e[#{trunc(row)};#{trunc(col)}f"])
-  end
-
-  defp draw_snake_piece(coord) do
-    [move_cursor(coord.y, coord.x * 2), ' x ']
-  end
-
-  defp draw_food_piece(coord) do
-    [move_cursor(coord.y, coord.x * 2), ' o ']
-  end
+  defp move_cursor(row, col), do: IO.ANSI.format(["\e[#{trunc(row)};#{trunc(col)}f"])
+  defp draw_piece(coord, symbol), do: [move_cursor(coord.y, coord.x * 2), " #{symbol} "]
 end
