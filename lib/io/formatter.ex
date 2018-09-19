@@ -1,4 +1,7 @@
-defmodule ExSnake.Formatter do
+defmodule ExSnake.IO.Formatter do
+  @moduledoc """
+  Constructs IO lists based on ExSnake.State and draws to the screen
+  """
   @mid_bar "\u2500"
   @vert_line "\u2502"
   @top_left_corner "\u250c"
@@ -6,6 +9,7 @@ defmodule ExSnake.Formatter do
   @bottom_left_corner "\u2514"
   @bottom_right_corner "\u2518"
 
+  @spec draw_game(ExSnake.State.t()) :: ExSnake.State.t()
   def draw_game(state) do
     [
       IO.ANSI.clear(),
@@ -20,6 +24,7 @@ defmodule ExSnake.Formatter do
     state
   end
 
+  @spec draw_snake_and_food(ExSnake.State.t()) :: ExSnake.State.t()
   def draw_snake_and_food(state) do
     [snake(state), food(state), IO.ANSI.home()]
     |> IO.write()
@@ -27,6 +32,7 @@ defmodule ExSnake.Formatter do
     state
   end
 
+  @spec undraw(ExSnake.State.t()) :: ExSnake.State.t()
   def undraw(%ExSnake.State{alive?: false} = state) do
     [undraw_snake(state), undraw_food(state)]
     |> IO.write()
@@ -35,18 +41,12 @@ defmodule ExSnake.Formatter do
   end
 
   def undraw(%ExSnake.State{snake: snake} = state) do
-    undraw_cell(Enum.at(snake, 0))
+    snake
+    |> Enum.at(0)
+    |> undraw_cell()
     |> IO.write()
 
     state
-  end
-
-  def vert_lines(height, width) do
-    Enum.map(1..height, fn row ->
-      Enum.map(1..width, fn col ->
-        draw_vert_line(row, col, width)
-      end)
-    end)
   end
 
   ## Private
@@ -77,13 +77,21 @@ defmodule ExSnake.Formatter do
 
   defp undraw_food(%ExSnake.State{food: food}), do: undraw_cell(food)
 
-  defp draw_vert_line(_, 1, _), do: @vert_line
-  defp draw_vert_line(_, col, width) when col == width, do: "    #{@vert_line}\n"
-  defp draw_vert_line(_, _, _), do: '  '
-
   defp top_bar(width) do
     [@top_left_corner, String.duplicate("#{@mid_bar}#{@mid_bar}", width), @top_right_corner, "\n"]
   end
+
+  defp vert_lines(height, width) do
+    Enum.map(1..height, fn row ->
+      Enum.map(1..width, fn col ->
+        draw_vert_line(row, col, width)
+      end)
+    end)
+  end
+
+  defp draw_vert_line(_, 1, _), do: @vert_line
+  defp draw_vert_line(_, col, width) when col == width, do: "    #{@vert_line}\n"
+  defp draw_vert_line(_, _, _), do: '  '
 
   defp bottom_bar(width) do
     [
